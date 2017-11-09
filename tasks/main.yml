@@ -60,10 +60,10 @@
     - sqlite-devel
     - libffi-devel
 
-- name: Setup ldconfig path for SCL Python
-  blockinfile:
-    path: "/etc/ld.so.conf.d/python{{ python_version }}.conf"
-    block: |
-      /opt/rh/rh-python{{ python_version }}/root/lib
-      /opt/rh/rh-python{{ python_version }}/root/lib64
+#- name: Setup ldconfig path for SCL Python
+#  blockinfile:
+#    path: "/etc/ld.so.conf.d/python{{ python_version }}.conf"
+#    block: |
+#      /opt/rh/rh-python{{ python_version }}/root/lib
+#      /opt/rh/rh-python{{ python_version }}/root/lib64
 
