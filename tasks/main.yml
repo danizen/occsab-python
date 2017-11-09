@@ -1,0 +1,69 @@
+---
+
+- name: Set python package for 3.4
+  set_fact:
+    python_package: "python34"
+    python_devel_package: "rh-python34-python-devel"
+  when: python_version == "3.4"
+
+- name: Set python package for 3.5
+  set_fact:
+    python_package: "rh-python35"
+    python_devel_package: "rh-python35-python-devel"
+  when: python_version == "3.5"
+
+- name: Set python package for 3.6
+  set_fact:
+    python_package: "rh-python36"
+    python_devel_package: "rh-python36-python-devel"
+  when: python_version == "3.6"
+
+- name: Enable scl repo
+  yum:
+    name: centos-release-scl-rh
+    state: present
+
+- name: Install Python
+  yum:
+    name: "{{ python_package }}"
+    state: present
+    update_cache: yes
+
+- name: Install PYthon devel
+  yum:
+    name: "{{ python_devel_package }}"
+    state: present
+    update_cache: yes
+  when: python_devel|bool
+
+- name: Install packages needed by python
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - zlib
+    - libxml2
+    - libxslt
+    - sqlite
+    - libffi
+
+# TODO: make these depend on some var, with when
+- name: Install development packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  when: python_devel|bool
+  with_items:
+    - zlib-devel
+    - libxml2-devel
+    - libxslt-devel
+    - sqlite-devel
+    - libffi-devel
+
+- name: Setup ldconfig path for SCL Python
+  blockinfile:
+    path: "/etc/ld.so.conf.d/python{{ python_version }}.conf"
+    block: |
+      /opt/rh/rh-python{{ python_version }}/root/lib
+      /opt/rh/rh-python{{ python_version }}/root/lib64
+
