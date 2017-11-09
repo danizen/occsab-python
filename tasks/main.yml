@@ -2,7 +2,7 @@
 
 - name: Set python package for 3.4
   set_fact:
-    python_package: "python34"
+    python_package: "rh-python34"
     python_devel_package: "rh-python34-python-devel"
   when: python_version == "3.4"
 
@@ -41,11 +41,14 @@
     name: "{{ item }}"
     state: present
   with_items:
+    - openssl
+    - libcurl
     - zlib
     - libxml2
     - libxslt
     - sqlite
     - libffi
+    - uuid
 
 # TODO: make these depend on some var, with when
 - name: Install development packages
@@ -54,11 +57,16 @@
     state: present
   when: python_devel|bool
   with_items:
+    - cmake                                     # Needed to build pyzmq and tornado
+    - opengpm                                   # Needed to build pyzmq
+    - openssl-devel
+    - libcurl-devel
     - zlib-devel
     - libxml2-devel
     - libxslt-devel
     - sqlite-devel
     - libffi-devel
+    - uuid-devel
 
 #- name: Setup ldconfig path for SCL Python
 #  blockinfile:
