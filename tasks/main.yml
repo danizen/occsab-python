@@ -4,18 +4,21 @@
   set_fact:
     python_package: "rh-python34"
     python_devel_package: "rh-python34-python-devel"
+    python_root: "/opt/rh/rh-python34/root"
   when: python_version == "3.4"
 
 - name: Set python package for 3.5
   set_fact:
     python_package: "rh-python35"
     python_devel_package: "rh-python35-python-devel"
+    python_root: "/opt/rh/rh-python35/root"
   when: python_version == "3.5"
 
 - name: Set python package for 3.6
   set_fact:
     python_package: "rh-python36"
     python_devel_package: "rh-python36-python-devel"
+    python_root: "/opt/rh/rh-python36/root"
   when: python_version == "3.6"
 
 - name: Enable scl repo
@@ -29,7 +32,7 @@
     state: present
     update_cache: yes
 
-- name: Install PYthon devel
+- name: Install Python devel
   yum:
     name: "{{ python_devel_package }}"
     state: present
@@ -58,7 +61,7 @@
   when: python_devel|bool
   with_items:
     - cmake                                     # Needed to build pyzmq and tornado
-    - opengpm                                   # Needed to build pyzmq
+    - openpgm                                   # Needed to build pyzmq
     - openssl-devel
     - libcurl-devel
     - zlib-devel
@@ -68,10 +71,16 @@
     - libffi-devel
     - uuid-devel
 
-#- name: Setup ldconfig path for SCL Python
-#  blockinfile:
-#    path: "/etc/ld.so.conf.d/python{{ python_version }}.conf"
-#    block: |
-#      /opt/rh/rh-python{{ python_version }}/root/lib
-#      /opt/rh/rh-python{{ python_version }}/root/lib64
+- name: Setup ldconfig path for SCL Python
+  blockinfile:
+    path: "/etc/ld.so.conf.d/python{{ python_version }}.conf"
+    block: |
+      {{ python_root }}/lib
+      {{ python_root }}/lib64
+    create: yes
+  register: python_ldsconfd
+
+- name: Run ldconfig because /etc/ld.so.conf.d/ has changed
+  command: ldconfig
+  when: python_ldsconfd.changed|bool
 

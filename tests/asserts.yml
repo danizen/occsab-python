@@ -1,0 +1,29 @@
+# Check that the system is properly provisioned
+---
+- stat:
+    path: /opt/rh/rh-python35/root
+  register: _root
+
+- stat:
+    path: /etc/ld.so.conf.d/python3.5.conf
+  register: _conf
+
+- name: rh-python35 root exists
+  assert:
+    that: _root.stat.exists == true
+
+- name: ldconfig for python35 exists
+  assert:
+    that: _conf.stat.exists == true
+
+- name: run python without first enabling it
+  shell: |
+    print('it works')
+  register: _run
+  args:
+    executable: /opt/rh/rh-python35/root/bin/python
+
+- name: python ran successfully
+  assert:
+    that:
+      - "'it works' in _run.stdout"
